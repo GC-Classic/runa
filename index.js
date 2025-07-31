@@ -1,7 +1,23 @@
 import {E,Q} from 'https://aeoq.github.io/AEOQ.mjs'
+const main = Q('main');
+const Storage = {
+    save () {
+        localStorage.setItem('rune', JSON.stringify(
+            [...main.children].reduce((obj, rune) => rune.dataset.level == 0 ? obj : {...obj, [E(rune).get('--id')]: rune.dataset.level}, {})
+        ));
+        localStorage.setItem('core', Reinforce.dialog.core.value);
+    },
+    load () {
+        Storage.rune = JSON.parse(localStorage.getItem('rune')) || {};
+        Storage.core = localStorage.getItem('core');
+    }
+}
 const Support = {
+    els: Q('figure[id|=support]'),
+    check: Q('#support-check input'),
     list: [5870,7177,7178,62738,79964],
-    rotate: index => Q('figure[id|=support]', (figure, i) => {
+    current: () => E(Q('#support')).get('--id'),
+    rotate: index => Support.els.forEach((figure, i) => {
         let item = Support.list.at((index + i - 1) % Support.list.length);
         E(figure).set({
             '--id': item,
@@ -11,10 +27,16 @@ const Support = {
     event () {
         Support.rotate(0);
         Q('figure[id|=support] button', (button, i) => button.onclick = () => {
-            let index = Support.list.indexOf(E(Q('#support')).get('--id'));
+            let index = Support.list.indexOf(Support.current());
             i === 0 ? index-- : index++;
             Support.rotate(index);
+            Support.active = Support.check.checked && Support.current();
+            Rune.target.present();
         });
+        Support.check.onchange = ev => {
+            Support.active = ev.target.checked && Support.current();
+            Rune.target.present();
+        }
     },
     effect: {
         7178: {buff: 0.05},
@@ -29,24 +51,27 @@ const Reinforce = {
         rune: E(Q('#rune')),
         desc: Q('p'), 
         core: Q('#core data'),
-        stat: Q('output')
+        stat: Q('output'),
+        button: Q('#reinforce')
     }),
+    imgs: {
+        attempt: Q('#attempt'), success: Q('#success'), fail: Q('#fail'),
+        clone: (which, time) => Reinforce.dialog.append(...
+            [...Reinforce.imgs[which].content.cloneNode(true).children].map(el => E(el).set({dataset: {time}}))
+        )
+    },
     event () {
-        Q('#reinforce').onclick = () => {
+        Reinforce.dialog.button.onclick = () => {
             const time = Date.now();
-            const clone = which => [...Q(which).content.cloneNode(true).children].map(el => E(el).set({dataset: {time}}));
             Reinforce.dialog.classList.add('attempt');
-            Reinforce.dialog.append(...clone('#attempt'));
-            setTimeout(() => {
+            Reinforce.imgs.clone('attempt', time);
+            Reinforce.timer = setTimeout(() => {
                 let result = Rune.target.reinforce();
-                Reinforce.dialog.append(...clone(result));
+                Reinforce.imgs.clone(result, time);
                 Reinforce.dialog.classList.remove('attempt');
+                Storage.save();
             }, 2000);
             setTimeout(() => Q(`[data-time='${time}']`, el => el.remove()), 5000);
-        }
-        Q('#support-check').onchange = ev => {
-            Support.active = ev.target.checked && E(Q('#support')).get('--id');
-            Rune.target.present();
         }
     },
     rate (level) {
@@ -66,7 +91,7 @@ const Reinforce = {
         return false;
     },
     disable (go = true) {
-        Q('#reinforce').disabled = Q('#support-check input').disabled = go;
+        Reinforce.dialog.button.disabled = Support.check.disabled = go;
         go && (Reinforce.dialog.desc.textContent = '');
     }
 }
@@ -83,7 +108,7 @@ class Rune {
         });
         this.el.rune = this;
         Object.assign(this, {
-            level: 0,
+            level: Storage.rune[id] || 0,
             place: count % 3 == 0 ? 'Weapon' : count % 3 == 1 ? 'Armor' : 'Helm',
             grade: Math.floor(count / 6) == 0 ? 3 : Math.floor(count / 6) == 1 ? 2 : 1,
             stat: count % 3 == 0 ? 'Attack' : 'Defense',
@@ -98,6 +123,7 @@ class Rune {
         E(this.el).set({ '--level': level });
     }
     prepare () {
+        clearTimeout(Reinforce.timer);
         Reinforce.dialog.rune.set({
             title: `${this.old ? 'Old ' : ''}${Rune.name[this.grade]} Rune`,
             dataset: { level: this.level },
@@ -105,7 +131,7 @@ class Rune {
         });
         this.present();
         this.check();
-        //Q('dialog img', img => img.remove());
+        Q('dialog img', img => img.remove());
         Reinforce.dialog.showModal();
     }
     present () {
@@ -136,7 +162,7 @@ class Rune {
             this.present();
             this.check();
         }
-        return success ? '#success' : '#fail';
+        return success ? 'success' : 'fail';
     }
     destroy () {
         this.el.classList.add('destroyed');
@@ -159,17 +185,19 @@ Object.assign(Rune, {
         [[5736,5719],[5664,5647],[5808,5791],[5700,5683],[5772,5755],[5844,5827]].forEach(([from, to]) => {
             let count = 0;
             for (let id = from; id >= to; id--)
-                Q('main').append(new Rune(id, count++).el);
+                main.append(new Rune(id, count++).el);
         });
+        Reinforce.dialog.core.value = Storage.core || 9999;
     },
     event () {
-        Q('main').onclick = ev => {
+        main.onclick = ev => {
             if (!ev.target.matches('.rune')) return;
             Rune.target = ev.target.rune;
             Rune.target.prepare();
         }
     },
 });
+Storage.load();
 Rune.init();
 Rune.event(); 
 Support.event();

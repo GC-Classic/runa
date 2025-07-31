@@ -23,10 +23,11 @@ figure,[data-sprite],.sprite {
 
     figcaption {
         position:absolute; top:50%; right:0; transform:translateY(-50%);
+        display:flex;
     }
     i {
         --item:initial; --sprite:url(shop.png);
-        --y:0; --w:16; --h:19; height:.5em;
+        --y:0; --w:16; --h:19; height:.6em;
         
         .destroyed &,&[hidden] {display:none;}
         &:first-of-type {
@@ -49,19 +50,21 @@ dialog figure {
     border:.15em solid; outline:.25em solid; border-radius:.75em;
 }
 main {
-    display:flex; flex-direction:column; flex-wrap:wrap; align-content:center;
-    max-height:54em;
+    display:grid; grid-template:repeat(18,auto)/repeat(6,min(3.5em,100%/6));
+    justify-content:center; grid-auto-flow:column;
 
     >* {
-        width:3em; height:3em;
+        width:100%; aspect-ratio:1 !important;
         cursor:pointer;
     }
 }
 dialog[open] {
     all:unset;
-    inset:revert; margin:0 auto;
-    font-size:min(12px,3svw);
-    width:min(400px,100svw); aspect-ratio:0.96;
+    box-sizing:border-box;
+    overflow:hidden;
+    inset:revert; margin:1em auto;
+    font-size:min(15px,3svw);
+    width:min(500px,100svw); aspect-ratio:0.96;
     display:grid; grid-template:6% 33% 8% 33% 20% / 3% 32% 30% 32% 3%;
     border-radius:.75em; border:.1em solid #e6e9f6;
     overflow:hidden;
@@ -198,7 +201,7 @@ blockquote {
         max-width:16.5em; max-height:4em;
         margin:0;
         text-align:left;
-        line-height:1.4;
+        line-height:1.3;
     }
 }
 #ela {
