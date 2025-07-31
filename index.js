@@ -170,7 +170,7 @@ class Rune {
     }
     static name = [, 'Brave', 'Holy', 'Honor']
     static stat = [, [
-        {Attack: l => Math.round(l*l*2/7+l*7/2    0+2)*2, Defense: l => l*l*3/26+l*4/5+5},
+        {Attack: l => Math.round(l*l*2/7+l*7/20+2)*2, Defense: l => l*l*3/26+l*4/5+5},
         {Attack: l => Math.round(l*l/4+l*37/100+1)*2, Defense: l => l*l/8+l*3/8+4}
     ], [
         {Attack: l => Math.round(l*l/2+l*2/45+5)*2, Defense: l => l*l/5+l*7/9+20},
