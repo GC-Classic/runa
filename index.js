@@ -97,15 +97,14 @@ const Reinforce = {
 }
 class Rune {
     constructor(id, count) {
-        this.el = E('figure', [
+        this.el = E('figure.rune.sprite', 
             E('figcaption', [
-                E('i', { classList: 'sprite' }), E('i', { classList: 'sprite' })
-            ])
-        ], {
-            '--id': id,
-            '--item': `url('sprite/${Math.floor(id / 100) * 100}.png')`,
-            classList: 'rune sprite',
-        });
+                E('i.sprite'), E('i.sprite')
+            ]), {
+                '--id': id,
+                '--item': `url('sprite/${Math.floor(id / 100) * 100}.png')`,
+            }
+        );
         this.el.rune = this;
         Object.assign(this, {
             level: Storage.rune[id] || 0,
