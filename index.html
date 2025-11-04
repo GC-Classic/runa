@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<meta charset=UTF-8>
+<meta name=viewport content='width=device-width,initial-scale=1'>
+<title>S2 Rune</title>
+<link rel="stylesheet" href="https://gc-classic.github.io/common.css" crossorigin="anonymous">
+<link rel="stylesheet" href="index.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Monda:wght@700&amp;family=Shippori+Antique&amp;family=Sofia+Sans+Condensed:wght@600;800&amp;display=swap" rel="stylesheet">
+
+<main></main>
+
+<dialog>    
+    <form method="dialog">Reinforce<button>❎</button></form>
+    <gc-item class="support-left">
+        <button class="sprite" style="--x:427;--y:177;--w:23;--h:31;height:4em;"></button>
+    </gc-item>
+    <gc-item class="support"></gc-item>
+    <label id="support-check"><input type="checkbox">Use Support Item</label>
+    <gc-item class="support-right">
+        <button class="sprite" style="--x:195;--y:0;--w:23;--h:31;height:4em;"></button>
+    </gc-item>
+    
+    <figure id="rune" class="rune sprite" title="" style="--x:166;--y:91;--w:121;--h:111;--level:9">
+        <output></output>
+    </figure>
+    <button id="reinforce" data-sprite="effect/equip2_2.png" style="--x:0;--y:0;--w:97;--h:106;height:9em;"></button>
+    <figure id="core" class="sprite" title="Aging Core" style="--x:166;--y:91;--w:121;--h:111;">
+        <gc-item id="5863"></gc-item>
+        <data value="9999"></data>
+    </figure>
+    <blockquote>
+        <i class="sprite" style="--x:450;--y:123;--w:20;--h:64;"></i>
+        <i class="sprite" style="--x:470;--y:123;--w:10;--h:64;width:15em;"></i>
+        <i class="sprite" style="--x:480;--y:123;--w:32;--h:64;"></i>
+        <p></p>
+    </blockquote>
+    <i id="ela" class="sprite" style="--x:0;--y:-96;--w:160;--h:96;height:8em;"></i>
+</dialog>
+
+<template id="attempt">
+    <img src="effect/ronan_special1-1-02.png" id="wheel">
+    <img src="effect/ronan_special1-1-01.png" id="pointer">
+    <img src="effect/orb.svg" id="light">
+</template>
+<template id="success">
+    <img src="effect/icecircle.png">
+    <img src="effect/success01.png">
+</template>
+<template id="fail">
+    <img src="effect/light_hit00.png">
+    <img src="effect/fail01.png">
+</template>
+
+<script type="module" src="../UIX.js"></script>
+<script type="module">
+import {E,Q} from 'https://aeoq.github.io/AEOQ.mjs'
+import {Rune,Reinforce} from './index.js'
+
+Q('dialog').showModal();
+Promise.allSettled(Q('[data-sprite],.sprite').map(el => new Promise((res, rej) => {
+    let sprite = el.dataset.sprite || E(el).get('--sprite').match(/url\((.+?)\)/)?.[1];
+    if (!sprite) return res();
+    E('img', {
+        src: sprite,
+        onload: function () {
+            let {width, height} = E(el).get('width', 'height');
+            let [scaleX, scaleY] = [width / E(el).get('--w'), height / E(el).get('--h')];
+            scaleX ||= scaleY; scaleY ||= scaleX;
+            E(el).set({
+                ...el.dataset.sprite ? {'--sprite': `url(${el.dataset.sprite})`} : {},
+                '--scaleX': scaleX,
+                '--scaleY': scaleY,
+                '--fullW': this.naturalWidth,
+                '--fullH': this.naturalHeight
+            });
+            res();
+        },
+    })
+}))).then(() => Q('dialog').close());
+</script>
